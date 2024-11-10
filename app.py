@@ -68,7 +68,7 @@ def send_welcome(message):
 @bot.message_handler(func=lambda message: True)
 def restack_workflow(message):
     # Configure the API endpoint
-    api_url = os.getenv('API_URL', 'http://localhost:8000')  # Allow configuration via environment variable
+    api_url = "https://3fdc-107-3-134-29.ngrok-free.app" # Allow configuration via environment variable
     endpoint = f"{api_url}/api/new_message"
     
     try:
