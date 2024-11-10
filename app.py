@@ -2,9 +2,11 @@ from flask import Flask, request, jsonify
 import telebot
 import os
 
+
+
 # Initialize Flask and bot
 app = Flask(__name__)
-bot = telebot.TeleBot(os.getenv('TELEGRAM_BOT_TOKEN'), threaded=False)
+bot = telebot.TeleBot(os.getenv('bot_token'), threaded=False)
 
 # Webhook configuration
 WEBHOOK_URL = os.getenv('WEBHOOK_URL', 'https://farmipole-69ae5776284b.herokuapp.com')
