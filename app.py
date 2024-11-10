@@ -1,25 +1,15 @@
 from flask import Flask, request, jsonify
 import telebot
-from telebot.handler_backends import WebhookHandler
+import os
 
 # Initialize Flask and bot
 app = Flask(__name__)
-bot = telebot.TeleBot("7826918701:AAGmBIL9xOrHN6JlQDJHQdBqYkkL2r9KSqI", threaded=False)
+bot = telebot.TeleBot(os.getenv('TELEGRAM_BOT_TOKEN'), threaded=False)
 
 # Webhook configuration
-WEBHOOK_URL = 'https://farmipole-69ae5776284b.herokuapp.com'
+WEBHOOK_URL = os.getenv('WEBHOOK_URL', 'https://farmipole-69ae5776284b.herokuapp.com')
 WEBHOOK_PATH = f'/webhook/{bot.token}'
 
-# Bot handlers
-@bot.message_handler(commands=['start', 'hello'])
-def send_welcome(message):
-    bot.reply_to(message, "Howdy, how are you doing?")
-
-@bot.message_handler(func=lambda message: True)
-def echo_all(message):
-    bot.reply_to(message, message.text)
-
-# Flask routes
 @app.route(WEBHOOK_PATH, methods=['POST'])
 def webhook():
     if request.headers.get('content-type') == 'application/json':
@@ -28,24 +18,25 @@ def webhook():
         bot.process_new_updates([update])
         return jsonify({'ok': True})
     else:
-        return jsonify({'ok': False})
+        return jsonify({'ok': False, 'error': 'Invalid content type'}), 400
 
+# Route for setting webhook
 @app.route('/set_webhook')
 def set_webhook():
-    webhook_url = f'{WEBHOOK_URL}{WEBHOOK_PATH}'
+    webhook_url = f'https://{WEBHOOK_URL}{WEBHOOK_PATH}'
     bot.remove_webhook()
-    webhook_info = bot.set_webhook(url=webhook_url)
-    return jsonify({
-        'webhook_url': webhook_url,
-        'success': webhook_info,
-        'webhook_info': bot.get_webhook_info().to_dict()
-    })
+    bot.set_webhook(url=webhook_url)
+    return f"Webhook set to {webhook_url}"
 
-@app.route('/webhook_info')
-def get_webhook_info():
-    return jsonify(bot.get_webhook_info().to_dict())
+# Simple health check route
+@app.route('/')
+def health():
+    return 'Bot is running'
+
+# Your message handlers here
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(message, "Hello! I'm your bot.")
 
 if __name__ == '__main__':
-    import os
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run()
