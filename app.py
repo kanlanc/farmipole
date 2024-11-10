@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import telebot
 import os
 import logging
+import requests
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -50,16 +51,52 @@ def set_webhook():
 def health():
     return 'Bot is running'
 
+
+@app.route("/schemes")
+def schemes():
+    logger.info(f"Schemes for farmers in India ")
+    # return a made up list of schemes with links to apply to them and also add this 
+
 # Your message handlers here
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     bot.reply_to(message, "Hello! I'm your bot.")
 
 
-# Add more message handlers here
+
+# Trigger the restack workflow for new messages
 @bot.message_handler(func=lambda message: True)
-def echo_all(message):
-    bot.reply_to(message, message.text)
+def restack_workflow(message):
+    # Configure the API endpoint
+    api_url = os.getenv('API_URL', 'http://localhost:8000')  # Allow configuration via environment variable
+    endpoint = f"{api_url}/api/new_message"
+    
+    try:
+        # Make the API request
+        response = requests.post(
+            endpoint,
+            json={
+                "prompt": message.text,  # Use the actual message text
+                "count": 5
+            },
+            headers={"Content-Type": "application/json"}
+        )
+        
+        if response.status_code == 200:
+            # Send the API response back to the user
+            bot.reply_to(message, f"Response from API: {response.text}")
+        else:
+            bot.reply_to(message, f"Error from API: Status code {response.status_code}")
+            logger.error(f"API error: {response.text}")
+            
+    except Exception as e:
+        error_message = f"Failed to connect to API: {str(e)}"
+        logger.error(error_message)
+        bot.reply_to(message, "Sorry, I couldn't process your request at the moment.")
+
+
+
+
 
 if __name__ == '__main__':
     app.run()
