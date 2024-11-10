@@ -7,7 +7,7 @@ app = Flask(__name__)
 bot = telebot.TeleBot("7826918701:AAGmBIL9xOrHN6JlQDJHQdBqYkkL2r9KSqI", threaded=False)
 
 # Webhook configuration
-WEBHOOK_URL = 'farmipole-69ae5776284b.herokuapp.com'  # Replace with your domain
+WEBHOOK_URL = 'https://farmipole-69ae5776284b.herokuapp.com'
 WEBHOOK_PATH = f'/webhook/{bot.token}'
 
 # Bot handlers
@@ -38,4 +38,6 @@ def set_webhook():
     return f"Webhook set to {webhook_url}"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
