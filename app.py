@@ -34,8 +34,16 @@ def webhook():
 def set_webhook():
     webhook_url = f'{WEBHOOK_URL}{WEBHOOK_PATH}'
     bot.remove_webhook()
-    bot.set_webhook(url=webhook_url)
-    return f"Webhook set to {webhook_url}"
+    webhook_info = bot.set_webhook(url=webhook_url)
+    return jsonify({
+        'webhook_url': webhook_url,
+        'success': webhook_info,
+        'webhook_info': bot.get_webhook_info().to_dict()
+    })
+
+@app.route('/webhook_info')
+def get_webhook_info():
+    return jsonify(bot.get_webhook_info().to_dict())
 
 if __name__ == '__main__':
     import os
