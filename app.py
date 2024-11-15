@@ -84,7 +84,7 @@ def restack_workflow(message):
         
         if response.status_code == 200:
             # Send the API response back to the user
-            bot.reply_to(message, f"Response from API: {response.text}")
+            bot.reply_to(message, f"{response.text}")
         else:
             bot.reply_to(message, f"Error from API: Status code {response.status_code}")
             logger.error(f"API error: {response.text}")
@@ -93,7 +93,6 @@ def restack_workflow(message):
         error_message = f"Failed to connect to API: {str(e)}"
         logger.error(error_message)
         bot.reply_to(message, "Sorry, I couldn't process your request at the moment.")
-
 
 
 
